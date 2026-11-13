@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Robô de Projeção de Tráfego Pago</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--tx:#14181f;--mut:#667085;--bd:#e3e6ee;--ac:#4f46e5;--ok:#0f9d58;--bad:#d93025;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1117;--card:#171b24;--tx:#e8eaf0;--mut:#98a2b3;--bd:#262c3a;--ac:#8b85ff;--ok:#34d399;--bad:#f87171;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1117;--card:#171b24;--tx:#e8eaf0;--mut:#98a2b3;--bd:#262c3a;--ac:#8b85ff;--ok:#34d399;--bad:#f87171;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;margin:0 0 4px}p.s{color:var(--mut);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:16px}
+h2{font-size:15px;margin:0 0 12px}
+.pre{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pre button{border:1px solid var(--bd);background:var(--bg);color:var(--tx);padding:7px 12px;border-radius:99px;cursor:pointer;font:inherit;font-size:13px}
+.pre button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+label{display:block;font-size:12px;color:var(--mut)}
+input{width:100%;margin-top:4px;padding:9px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+.k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.k div{background:var(--bg);border-radius:10px;padding:12px}.k b{display:block;font-size:20px}.k span{font-size:12px;color:var(--mut)}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.fr{margin:6px 0}.fr .t{display:flex;justify-content:space-between;font-size:13px}
+.bar{height:22px;border-radius:6px;background:var(--ac);min-width:3px;opacity:.9}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px;min-width:520px}
+th,td{padding:8px;text-align:right;border-bottom:1px solid var(--bd)}th:first-child,td:first-child{text-align:left}
+th{color:var(--mut);font-weight:600;font-size:12px}
+.note{font-size:12px;color:var(--mut)}
+textarea{width:100%;margin-top:8px;padding:9px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:12px/1.4 ui-monospace,Menlo,monospace}
+#im{margin-top:10px}
+#ins li{margin:4px 0}
+</style></head><body><main>
+<h1>🤖 Robô de Projeção de Tráfego Pago</h1>
+<p class="s">Informe o valor investido e seus indicadores reais. O robô projeta leads, leads quentes, vendas e retorno em 3 cenários.</p>
+
+<div class="card"><h2>0. Importar dados reais das campanhas (CSV)</h2>
+<p class="note" style="margin:0 0 10px">Exporte o relatório do Meta Ads ou Google Ads em CSV (por campanha, conjunto ou anúncio) e envie aqui, ou cole o conteúdo. O robô soma as linhas e preenche investimento, CPM, CTR, taxa de conexão e conversão da página. O arquivo é lido no seu navegador e não é enviado a nenhum servidor.</p>
+<input type="file" id="fl" accept=".csv,.tsv,.txt">
+<textarea id="tx" rows="4" placeholder="Ou cole aqui o conteúdo do CSV..."></textarea>
+<div class="pre" style="margin:10px 0 0"><button id="bi">Importar dados</button><button id="be">Carregar exemplo</button></div>
+<div id="im" class="note"></div></div>
+
+<div class="card"><h2>1. Perfil e indicadores</h2>
+<div class="pre" id="pre"></div>
+<div class="g" id="in"></div>
+<p class="note" style="margin-top:10px">Os valores iniciais de cada perfil são referências médias de mercado (estimativas), não dados da sua conta. Substitua pelos números reais do seu Gerenciador de Anúncios / Google Ads / CRM para uma projeção fiel.</p></div>
+
+<div class="card"><h2>2. Resultado provável (cenário realista)</h2><div class="k" id="kp"></div></div>
+<div class="card"><h2>3. Funil de conversão</h2><div id="fn"></div></div>
+<div class="card"><h2>4. Cenários</h2><div class="tw"><table id="tb"></table></div>
+<p class="note" style="margin-top:8px">Conservador: taxas −30% e CPM +20%. Otimista: taxas +30% e CPM −15%.</p></div>
+<div class="card"><h2>5. Diagnóstico do robô</h2><ul id="ins"></ul></div>
+
+<script>
+var F=[["inv","Investimento (R$)",5000],["cpm","CPM – custo por mil impressões (R$)",30],["ctr","CTR – cliques / impressões (%)",1.3],["conn","Taxa de conexão – visitas / cliques (%)",75],["lp","Conversão da página – leads / visitas (%)",15],["hot","% de leads quentes (qualificados)",30],["close","Fechamento – vendas / leads quentes (%)",15],["ticket","Ticket médio (R$)",500],["cost","Custo do produto/serviço (% da receita)",20]];
+var P={"Infoproduto":[35,1.2,75,20,25,10,497,10],"Serviço local":[28,1.5,80,12,35,25,1500,40],"E-commerce":[30,1.3,70,2.5,100,100,180,55],"B2B / Alto ticket":[60,0.8,70,6,20,15,5000,30]};
+var $=function(i){return document.getElementById(i)};
+var brl=function(n){return isFinite(n)?n.toLocaleString("pt-BR",{style:"currency",currency:"BRL"}):"—"};
+var num=function(n,d){return isFinite(n)?n.toLocaleString("pt-BR",{maximumFractionDigits:d==null?0:d}):"—"};
+F.forEach(function(f){var l=document.createElement("label");l.innerHTML=f[1]+'<input type="number" step="any" min="0" id="'+f[0]+'" value="'+f[2]+'">';$("in").appendChild(l);l.querySelector("input").addEventListener("input",run)});
+Object.keys(P).forEach(function(n,i){var b=document.createElement("button");b.textContent=n;b.onclick=function(){var v=P[n];["cpm","ctr","conn","lp","hot","close","ticket","cost"].forEach(function(k,j){$(k).value=v[j]});[].forEach.call($("pre").children,function(c){c.classList.remove("on")});b.classList.add("on");run()};$("pre").appendChild(b)});
+function g(k){return parseFloat($(k).value)||0}
+function calc(m,cm){var inv=g("inv"),cpm=g("cpm")*cm,imp=cpm?inv/cpm*1000:0,cl=imp*g("ctr")/100*m,vis=cl*g("conn")/100,le=vis*g("lp")/100*m,ho=le*Math.min(g("hot"),100)/100,sa=ho*Math.min(g("close")*m,100)/100,rev=sa*g("ticket"),lucro=rev*(1-g("cost")/100)-inv;
+return{inv:inv,imp:imp,cl:cl,vis:vis,le:le,ho:ho,sa:sa,rev:rev,lucro:lucro,roas:inv?rev/inv:0,cpl:le?inv/le:NaN,cph:ho?inv/ho:NaN,cac:sa?inv/sa:NaN,roi:inv?lucro/inv*100:0}}
+function run(){
+var S=[["Conservador",.7,1.2],["Realista",1,1],["Otimista",1.3,.85]],R=S.map(function(s){return calc(s[1],s[2])}),r=R[1];
+var be=1/(1-Math.min(g("cost"),99)/100);
+var kp=[["Leads",num(r.le),""],["Leads quentes",num(r.ho),""],["Vendas",num(r.sa,1),""],["Receita",brl(r.rev),""],["Lucro / prejuízo",brl(r.lucro),r.lucro>=0?"ok":"bad"],["ROAS",num(r.roas,2)+"x",r.roas>=be?"ok":"bad"],["CPL",brl(r.cpl),""],["CAC",brl(r.cac),""]];
+$("kp").innerHTML=kp.map(function(k){return'<div><span>'+k[0]+'</span><b class="'+k[2]+'">'+k[1]+'</b></div>'}).join("");
+var st=[["Impressões",r.imp],["Cliques",r.cl],["Visitas na página",r.vis],["Leads",r.le],["Leads quentes",r.ho],["Vendas",r.sa]],mx=st[0][1]||1;
+$("fn").innerHTML=st.map(function(s,i){var w=Math.max(Math.pow(s[1]/mx,.35)*100,1.5),p=i&&st[i-1][1]?" · "+num(s[1]/st[i-1][1]*100,1)+"% da etapa anterior":"";return'<div class="fr"><div class="t"><span>'+s[0]+'</span><span>'+num(s[1],i>4?1:0)+p+'</span></div><div class="bar" style="width:'+w+'%"></div></div>'}).join("")+'<p class="note">A largura das barras usa escala suavizada para que as etapas finais continuem visíveis.</p>';
+var rows=[["Leads",function(x){return num(x.le)}],["Leads quentes",function(x){return num(x.ho)}],["Vendas",function(x){return num(x.sa,1)}],["Receita",function(x){return brl(x.rev)}],["Lucro",function(x){return brl(x.lucro)}],["ROAS",function(x){return num(x.roas,2)+"x"}],["ROI",function(x){return num(x.roi,0)+"%"}],["CPL",function(x){return brl(x.cpl)}],["Custo por lead quente",function(x){return brl(x.cph)}],["CAC",function(x){return brl(x.cac)}]];
+$("tb").innerHTML="<tr><th></th>"+S.map(function(s){return"<th>"+s[0]+"</th>"}).join("")+"</tr>"+rows.map(function(w){return"<tr><td>"+w[0]+"</td>"+R.map(function(x){return"<td>"+w[1](x)+"</td>"}).join("")+"</tr>"}).join("");
+var t=[];
+t.push("ROAS de equilíbrio (break-even) com seu custo: <b>"+num(be,2)+"x</b>. No cenário realista você projeta <b>"+num(r.roas,2)+"x</b> — "+(r.roas>=be?"acima do ponto de equilíbrio.":"abaixo do ponto de equilíbrio; a operação tende a dar prejuízo."));
+t.push("O cenário conservador projeta "+(R[0].lucro>=0?"lucro":"prejuízo")+" de "+brl(Math.abs(R[0].lucro))+"; o otimista, "+(R[2].lucro>=0?"lucro":"prejuízo")+" de "+brl(Math.abs(R[2].lucro))+".");
+if(g("ctr")<1)t.push("CTR abaixo de 1%: revise criativos e copy dos anúncios.");
+if(g("lp")<5&&g("hot")<100)t.push("Conversão da página baixa: teste oferta, headline e velocidade de carregamento.");
+if(g("conn")<70)t.push("Taxa de conexão baixa: possível lentidão da página ou cliques acidentais.");
+if(g("close")<10&&g("hot")<100)t.push("Fechamento baixo: melhore o tempo de resposta ao lead e o script comercial.");
+var ex=Math.ceil(r.sa?be*g("inv")/(r.rev/r.sa||1):0);
+t.push("Com o ticket de "+brl(g("ticket"))+", cada venda custa em média "+brl(r.cac)+" em anúncios; ticket lucrativo por venda: "+brl(g("ticket")*(1-g("cost")/100))+".");
+$("ins").innerHTML=t.map(function(x){return"<li>"+x+"</li>"}).join("");
+}
+var K={spend:["valor usado","amount spent","gasto","custo","cost","spend","investimento"],imp:["impress"],clk:["cliques no link","link clicks","cliques","clicks"],lpv:["visualizações da página de destino","landing page views","landing page"],lead:["leads","resultados","results","conversões","conversions","cadastros"]};
+function pn(s){s=String(s==null?"":s).replace(/[^\d.,-]/g,"");if(!s)return NaN;var a=s.lastIndexOf("."),b=s.lastIndexOf(",");if(a>-1&&b>-1){s=a>b?s.replace(/,/g,""):s.replace(/\./g,"").replace(",",".")}else if(b>-1){s=/,\d{1,2}$/.test(s)&&s.split(",").length==2?s.replace(",","."):s.replace(/,/g,"")}else if(a>-1&&/^-?\d{1,3}(\.\d{3})+$/.test(s)){s=s.replace(/\./g,"")}return parseFloat(s)}
+function csv(t){var l=t.split("\n")[0],d=",",best=(l.match(/,/g)||[]).length;[";","\t"].forEach(function(x){var c=(l.split(x).length-1);if(c>best){best=c;d=x}});var rows=[],r=[],c="",q=false;for(var i=0;i<t.length;i++){var h=t[i];if(q){if(h=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=h}else if(h=='"')q=true;else if(h==d){r.push(c);c=""}else if(h=="\n"||h=="\r"){if(h=="\r"&&t[i+1]=="\n")i++;r.push(c);c="";if(r.join("").trim())rows.push(r);r=[]}else c+=h}r.push(c);if(r.join("").trim())rows.push(r);return rows}
+function doImport(t){
+var out=$("im"),rows=csv(t.replace(/^\uFEFF/,""));
+if(rows.length<2){out.textContent="Não encontrei dados. Verifique o conteúdo do CSV.";return}
+var bad=/\bpor\b|\bper\b|cpc|cpm|ctr|taxa|rate|%/,col=null,hi=-1;
+for(var ri=0;ri<Math.min(6,rows.length)&&!col;ri++){var hd=rows[ri].map(function(x){return x.toLowerCase().trim()}),m={};
+Object.keys(K).forEach(function(k){for(var p=0;p<K[k].length;p++){var ix=hd.findIndex(function(h){return h.indexOf(K[k][p])>-1&&!bad.test(h)});if(ix>-1){m[k]=ix;break}}});
+if(m.spend!=null&&m.imp!=null){col=m;hi=ri}}
+if(!col){out.textContent="Não reconheci as colunas. São necessárias ao menos “Valor usado/Custo” e “Impressões”.";return}
+var s={spend:0,imp:0,clk:0,lpv:0,lead:0},n=0;
+rows.slice(hi+1).forEach(function(r){if(/^total/i.test((r[0]||"").trim()))return;var any=false;Object.keys(col).forEach(function(k){var v=pn(r[col[k]]);if(isFinite(v)){s[k]+=v;any=true}});if(any)n++});
+if(!s.spend||!s.imp){out.textContent="Os dados importados não têm valor usado ou impressões válidos.";return}
+var set=function(k,v,d){if(isFinite(v))$(k).value=+v.toFixed(d)};
+set("inv",s.spend,2);set("cpm",s.spend/s.imp*1000,2);
+if(s.clk){set("ctr",s.clk/s.imp*100,2);if(col.lpv!=null&&s.lpv)set("conn",Math.min(s.lpv/s.clk*100,100),1)}
+var vis=s.clk*g("conn")/100,msg="";
+if(col.lead!=null&&s.lead&&vis){set("lp",s.lead/vis*100,2);msg=" · CPL real: <b>"+brl(s.spend/s.lead)+"</b>"}else msg=" · Coluna de leads/resultados não encontrada: a conversão da página não foi atualizada.";
+[].forEach.call($("pre").children,function(c){c.classList.remove("on")});
+out.innerHTML="✔ "+n+" linhas importadas. Investimento <b>"+brl(s.spend)+"</b> · Impressões <b>"+num(s.imp)+"</b> · Cliques <b>"+num(s.clk)+"</b> · Leads <b>"+num(s.lead)+"</b>"+msg+"<br>Confirme agora, com dados do seu CRM e de vendas: % de leads quentes, taxa de fechamento, ticket médio e custo do produto.";
+run()}
+$("bi").onclick=function(){var t=$("tx").value.trim();if(t)doImport(t);else $("im").textContent="Envie um arquivo ou cole o CSV primeiro."};
+$("be").onclick=function(){$("tx").value="Nome da campanha,Valor usado (BRL),Impressões,Cliques no link,Visualizações da página de destino,Resultados\nCampanha A,2150.40,68000,910,690,118\nCampanha B,1840.75,59000,720,540,74"};
+$("fl").onchange=function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){$("tx").value=rd.result;doImport(String(rd.result))};rd.readAsText(f)};
+run();
+</script></main></body></html>
